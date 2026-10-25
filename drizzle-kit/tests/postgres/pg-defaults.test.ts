@@ -613,6 +613,11 @@ test('varchar + varchar arrays', async () => {
 		`'{#6ddf5b,#418536,"","","","",""}'::varchar(7)[]`,
 	);
 
+	// https://github.com/drizzle-team/drizzle-orm/issues/6590
+	const res17 = await diffDefault(_, varchar().array().default(sql`ARRAY[]`), `ARRAY[]::varchar[]`);
+	const res18 = await diffDefault(_, varchar().array().default(sql`ARRAY[]::varchar[]`), `ARRAY[]::varchar[]`);
+	const res19 = await diffDefault(_, varchar().array('[][]').default(sql`ARRAY[]`), `ARRAY[]::varchar[]`);
+
 	expect.soft(res1).toStrictEqual([]);
 	expect.soft(res2).toStrictEqual([]);
 	expect.soft(res3).toStrictEqual([]);
@@ -629,6 +634,9 @@ test('varchar + varchar arrays', async () => {
 	expect.soft(res14).toStrictEqual([]);
 	expect.soft(res15).toStrictEqual([]);
 	expect.soft(res16).toStrictEqual([]);
+	expect.soft(res17).toStrictEqual([]);
+	expect.soft(res18).toStrictEqual([]);
+	expect.soft(res19).toStrictEqual([]);
 });
 
 // https://github.com/drizzle-team/drizzle-orm/issues/4231

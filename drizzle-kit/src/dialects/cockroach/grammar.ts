@@ -133,10 +133,9 @@ export const defaultNameForIndex = (table: string, columns: string[]) => {
 };
 
 // ::text, ::varchar(256), ::text::varchar(256), ::test-test / ::"user-role" (hyphenated, incl. quoted)
+// only `[]` that belongs to a `::type[]` cast is trimmed, `ARRAY[]` keeps its brackets
 export function trimDefaultValueSuffix(defaultValue: string) {
-	let res = defaultValue.endsWith('[]') ? defaultValue.slice(0, -2) : defaultValue;
-	res = res.replace(/(::["a-zA-Z_][\w\s.\-"]*?(?:\([^()]*\))?(?:\[\])?)+$/g, '');
-	return res;
+	return defaultValue.replace(/(::["a-zA-Z_][\w\s.\-"]*?(?:\([^()]*\))?(?:\[\])*)+$/g, '');
 }
 
 export const defaultForColumn = (

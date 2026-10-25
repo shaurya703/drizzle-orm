@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
 	bigint,
 	boolean,
@@ -8,6 +9,7 @@ import {
 	text,
 	timestamp,
 	uuid,
+	varchar,
 } from 'drizzle-orm/cockroach-core';
 import { expect } from 'vitest';
 import { diff, push, test } from './mocks';
@@ -259,6 +261,31 @@ test.concurrent('array #12: enum empty array default', async ({ dbc: db }) => {
 	const { sqlStatements: pst } = await push({ db, to });
 
 	const st0 = ['ALTER TABLE "test" ADD COLUMN "values" "test_enum"[] DEFAULT \'{}\'::"test_enum"[];'];
+	expect(st).toStrictEqual(st0);
+	expect(pst).toStrictEqual(st0);
+});
+
+// https://github.com/drizzle-team/drizzle-orm/issues/6590
+test.concurrent('array #13: empty ARRAY[] sql default', async ({ dbc: db }) => {
+	const from = {
+		test: cockroachTable('test', {
+			id: int4('id'),
+		}),
+	};
+	const to = {
+		test: cockroachTable('test', {
+			id: int4('id'),
+			values: varchar('values').array().default(sql`ARRAY[]`),
+		}),
+	};
+
+	const { sqlStatements: st } = await diff(from, to, []);
+
+	await push({ db, to: from, schemas: ['public'] });
+	// CockroachDB stores `ARRAY[]` as `'{}'::VARCHAR[]`, so the subsequent push is not compared here
+	const { sqlStatements: pst } = await push({ db, to, schemas: ['public'], ignoreSubsequent: true });
+
+	const st0 = [`ALTER TABLE "test" ADD COLUMN "values" varchar[] DEFAULT ARRAY[]::varchar[];`];
 	expect(st).toStrictEqual(st0);
 	expect(pst).toStrictEqual(st0);
 });

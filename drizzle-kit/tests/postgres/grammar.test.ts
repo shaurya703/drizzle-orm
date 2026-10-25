@@ -54,6 +54,11 @@ test.each([
 	],
 	[`'{"1 day 01:00:00","1 day 02:00:00"}'::interval[]`, `'{"1 day 01:00:00","1 day 02:00:00"}'`],
 	[`(predict -> 'predictions'::text)`, `(predict -> 'predictions'::text)`],
+	[`'{{a},{b}}'::text[][]`, `'{{a},{b}}'`],
+	[`ARRAY[]::character varying[]`, `ARRAY[]`],
+	[`ARRAY[]::varchar[]`, `ARRAY[]`],
+	[`ARRAY[]`, `ARRAY[]`],
+	[`ARRAY['a'::text]`, `ARRAY['a'::text]`],
 ])('trim default suffix %#: %s', (it, expected) => {
 	expect(trimDefaultValueSuffix(it)).toBe(expected);
 });
