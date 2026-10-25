@@ -1,4 +1,3 @@
-import type { PGlite } from '@electric-sql/pglite';
 import type { ConnectionOptions } from 'tls';
 import type { TypeOf } from 'zod';
 import { boolean, coerce, custom, literal, object, string, undefined as zUndefined, union } from 'zod';
@@ -61,9 +60,22 @@ export const awsDataApiCredentials = object({
 	resourceArn: string().min(1),
 });
 
+/**
+ * The part of a `PGlite` instance from `@electric-sql/pglite` that drizzle-kit uses.
+ *
+ * It is declared here instead of importing `PGlite`, because the type of `drizzle.config.ts`
+ * is built from this file and `@electric-sql/pglite` is not a dependency of drizzle-kit.
+ */
+export interface PGliteClient {
+	readonly dataDir?: string;
+	readonly waitReady: Promise<void>;
+	query(...args: any[]): Promise<unknown>;
+	transaction(...args: any[]): Promise<unknown>;
+}
+
 export const pgLiteCredentials = object({ url: string().min(1) });
 export const pgLiteClientCredentials = object({
-	client: custom<PGlite>((client) => typeof client === 'object' && client !== null),
+	client: custom<PGliteClient>((client) => typeof client === 'object' && client !== null),
 });
 
 export const postgresCredentials = union([
